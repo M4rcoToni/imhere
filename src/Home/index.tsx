@@ -1,25 +1,75 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Alert, FlatList, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Participant } from '../components/Participant';
 import { styles } from './styles';
+import { useAsyncStorage } from '@react-native-async-storage/async-storage';
+import uuid from 'react-native-uuid';
+interface Props {
+  id: string;
+  participantName: string;
+}
 
 export function Home() {
-  const [participants, setParticipants] = useState<string[]>([]);
+  const [participants, setParticipants] = useState<Props[]>([]);
   const [participantName, setParticipantName] = useState('')
+  const { getItem, setItem } = useAsyncStorage("@contextmenu");
 
-  function handleParticipantAdd() {
-    if (participants.includes(participantName)) {
-      return Alert.alert('Participante existe', 'Já existe um participante na lista com esse nome')
+  async function handleParticipantAdd() {
+    const id = uuid.v4();
+
+    const newParticipant = { //SCHEMA
+      id,
+      participantName,
     }
-    setParticipants(prev => [...prev, participantName]);
+
+    if (participantName.trim() === '') {
+      return Alert.alert('Nome inválido', 'Digite um nome válido')
+    }
+
+    try {
+      if (newParticipant.participantName.length > 0) {
+        const response = await getItem();
+        const previousData = response ? JSON.parse(response) : [];
+
+        const data = [...previousData, newParticipant];
+
+        await setItem(JSON.stringify(data));
+      }
+    } catch (error) {
+      console.log(error);
+    }
+    setParticipantName('');
+    handleShowTag();
+  }
+
+  async function handleShowTag() {
+
+    try {
+      const response = await getItem();
+      const data = response ? JSON.parse(response) : [];
+
+      setParticipants(data);
+
+    } catch (error) {
+      console.log(error);
+    }
     setParticipantName('');
   }
 
-  function handleParticipantRemove(name: string) {
+  async function handleRemove(id: string) {
+    const response = await getItem();
+    const previousData = response ? JSON.parse(response) : [];
+
+    const data = previousData.filter((item: Props) => item.id !== id);
+    setItem(JSON.stringify(data));
+    handleShowTag();
+  }
+
+  async function handleParticipantRemove(name: string, id: string) {
     Alert.alert('Remover participante', `Deseja remover ${name} da lista de presença?`, [
       {
         text: 'Sim',
-        onPress: () => Alert.alert('Deletado!')
+        onPress: () => handleRemove(id)
       },
       {
         text: 'Não',
@@ -27,6 +77,9 @@ export function Home() {
       }
     ])
   }
+  useEffect(() => {
+    handleShowTag();
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -60,12 +113,12 @@ export function Home() {
       <FlatList
         showsHorizontalScrollIndicator={false}
         data={participants}
-        keyExtractor={item => item}
+        keyExtractor={item => item.id}
         renderItem={({ item }) => (
           <Participant
-            key={item}
-            name={item}
-            onRemove={() => handleParticipantRemove(item)} />
+            key={item.id}
+            name={item.participantName}
+            onRemove={() => handleParticipantRemove(item.participantName, item.id)} />
         )}
         ListEmptyComponent={() => (
           <Text style={styles.emptyList}>
