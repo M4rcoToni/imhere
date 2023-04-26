@@ -12,6 +12,7 @@ interface Props {
 export function Home() {
   const [participants, setParticipants] = useState<Props[]>([]);
   const [participantName, setParticipantName] = useState('')
+  const [date, setDate] = useState('');
   const { getItem, setItem } = useAsyncStorage("@contextmenu");
 
   async function handleParticipantAdd() {
@@ -77,7 +78,18 @@ export function Home() {
       }
     ])
   }
+  function getDate() {
+    const date = new Date();
+    const day = date.getDate();
+    const month = date.getMonth();
+    const year = date.getFullYear();
+    const weekDay = date.getDay();
+    const weekDayName = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+    const monthName = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+    setDate(`${weekDayName.at(weekDay)}, ${day} de ${monthName.at(month)} de ${year} `)
+  }
   useEffect(() => {
+    getDate()
     handleShowTag();
   }, []);
 
@@ -89,7 +101,7 @@ export function Home() {
       </Text>
 
       <Text style={styles.eventDate}>
-        Segunda, 27 de Março de 2023
+        {date}
       </Text>
 
       <View style={styles.form}>
