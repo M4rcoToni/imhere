@@ -2,7 +2,7 @@
 
 Aplicativo simples para anotar participantes em eventos.
 
-<img height="550" src=".github/imgs/home.png"/>  
+<img height="550" src=".github/imgs/home.png"/>  <img height="550" src=".github/imgs/homegif.gif"/>  
 
 ## Para instalar o Imhere, siga estes passos:
 
