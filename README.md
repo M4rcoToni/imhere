@@ -16,3 +16,7 @@ Aplicativo simples para anotar participantes em eventos.
 - TypeScript
 - Async Storage
 - React Native UUID
+
+<br></br>
+
+Projeto desenvolvido com 🖤 por [M4rcotoni](https://github.com/m4rcotoni)
